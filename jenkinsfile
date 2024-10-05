@@ -1,0 +1,28 @@
+pipeline {
+	agent any
+	tools {
+		maven 'my-maven'
+		jdk 'Jdk-17'
+	}
+	stages {
+		stage('Clone')
+		{
+			steps {git url:'https://github.com/Prathyusha287617/spring-jwt-main.git', branch:'authentication-service'}
+		}
+		stage('Build'){
+			steps {bat "mvn clean install -DskipTests"}
+		}
+		stage('Test'){
+			steps{bat "mvn test"}
+		}
+		stage('Deploy') {
+			steps {
+			    bat "docker rm -f auth-container"
+			    bat "docker rmi -f auth-image"
+			    bat "docker build -t auth-image ."
+			    bat "docker run -p 8090:8090 -d --name auth-container auth-image"
+			}
+		}
+	}
+}
+	
